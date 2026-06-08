@@ -41,7 +41,7 @@ export default function Overview() {
               <p>
                 Located in the rapidly growing Sector 22D along the Yamuna Expressway, Gaur Yamuna
                 City offers thoughtfully designed 3 & 4 BHK luxury residences surrounded by expansive
-                green spaces and world-class infrastructure. Spread across approximately 10.5 acres, this
+                green spaces and world-class infrastructure. Spread across approximately 12 acres, this
                 premium development features modern high-rise towers, elegant architecture, and over
                 50 lifestyle amenities crafted for contemporary family living.
               </p>
