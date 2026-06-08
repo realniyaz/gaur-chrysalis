@@ -128,7 +128,7 @@ export default function Footer() {
                   className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors group"
                 >
                   <Mail className="h-4 w-4 text-[#dfc7a1] flex-shrink-0" />
-                  <span className="text-xs font-semibold truncate">sales@gaurprojects.com</span>
+                  <span className="text-xs font-semibold truncate">realtyfmleads@gmail.com</span>
                 </a>
               </li>
             </ul>
