@@ -124,7 +124,7 @@ export default function Footer() {
               </li>
               <li>
                 <a
-                  href="mailto:sales@gaurprojects.com"
+                  href="mailto:realtyfmleads@gmail.com"
                   className="flex items-center gap-3 text-gray-400 hover:text-white transition-colors group"
                 >
                   <Mail className="h-4 w-4 text-[#dfc7a1] flex-shrink-0" />
