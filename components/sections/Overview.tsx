@@ -1,10 +1,25 @@
 "use client";
 
-import React from "react";
-import { Download } from "lucide-react";
+import React, { useState } from "react";
+import { Download, X, CheckCircle2 } from "lucide-react";
+
+interface FormDataState {
+  name: string;
+  email: string;
+  phone: string;
+  message: string;
+}
 
 export default function Overview() {
-  // Array of your 4 custom public images for the grid gallery
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [formData, setFormData] = useState<FormDataState>({
+    name: "",
+    email: "",
+    phone: "",
+    message: "",
+  });
+
   const galleryImages = [
     { src: "/aerial.jpeg", alt: "Gaur Chrysalis Aerial View" },
     { src: "/banner2.png", alt: "Luxury Swimming Pool & Deck" },
@@ -20,6 +35,17 @@ export default function Overview() {
     "Approx. 15 minutes from Jewar International Airport",
     "Lush green landscapes & open spaces",
   ];
+
+  const handleModalSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitted(true);
+  };
+
+  const openFormModal = () => {
+    setIsSubmitted(false);
+    setFormData({ name: "", email: "", phone: "", message: "" });
+    setIsModalOpen(true);
+  };
 
   return (
     <section id="overview" className="w-full bg-white py-16 md:py-24 scroll-mt-20">
@@ -67,14 +93,14 @@ export default function Overview() {
               ))}
             </div>
 
-            {/* Brochure CTA Button */}
+            {/* Integrated Brochure CTA Button Toggled to Modern Form Popup */}
             <div className="pt-4 w-full sm:w-auto">
               <button
-                onClick={() => console.log("Downloading Brochure...")}
-                className="inline-flex w-full sm:w-auto items-center justify-center gap-2.5 rounded-full bg-[#dfc7a1] px-7 py-3.5 text-xs font-bold uppercase tracking-wider text-gray-900 shadow-md transition-all duration-300 hover:bg-[#d1b48c] hover:scale-[1.01] active:scale-[0.99]"
+                onClick={openFormModal}
+                className="inline-flex w-full sm:w-auto items-center justify-center gap-2.5 rounded-full bg-[#dfc7a1] px-7 py-3.5 text-xs font-bold uppercase tracking-widest text-gray-950 shadow-md transition-all duration-300 hover:bg-[#ebd5b2] hover:scale-105 active:scale-[0.98]"
               >
                 <Download className="h-4 w-4 stroke-[2.5]" />
-                Brochure
+                Download Brochure
               </button>
             </div>
           </div>
@@ -105,6 +131,104 @@ export default function Overview() {
 
         </div>
       </div>
+
+      {/* =========================================================================
+          UNIFIED BROCHURE MODAL WINDOW (CLEAN HERO MATCHING STRUCTURE)
+          ========================================================================= */}
+      {isModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/70 transition-opacity duration-300 animate-fade-in">
+          <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col p-6 sm:p-8 space-y-6">
+            
+            {/* Modal Header Panel */}
+            <div className="flex items-center justify-between border-b border-gray-100 pb-4">
+              <h3 className="text-lg font-bold text-gray-900 tracking-tight">
+                Get More Details Enquire Now
+              </h3>
+              <button 
+                onClick={() => setIsModalOpen(false)}
+                className="p-1 rounded-md text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none"
+                aria-label="Close form window"
+              >
+                <X className="h-5 w-5 stroke-[2.5]" />
+              </button>
+            </div>
+
+            {!isSubmitted ? (
+              <form onSubmit={handleModalSubmit} className="space-y-4">
+                {/* Name Input Box */}
+                <div className="flex flex-col space-y-1">
+                  <input
+                    type="text"
+                    required
+                    value={formData.name}
+                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                    placeholder="Enter Name"
+                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                  />
+                </div>
+
+                {/* Email Input Box */}
+                <div className="flex flex-col space-y-1">
+                  <input
+                    type="email"
+                    required
+                    value={formData.email}
+                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                    placeholder="Enter Email"
+                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                  />
+                </div>
+
+                {/* Contact Phone Input Box with Integrated ISD Extension */}
+                <div className="flex flex-col space-y-1">
+                  <div className="relative flex items-center border border-gray-300 rounded-xl bg-white focus-within:ring-2 focus-within:ring-gray-900 focus-within:border-transparent transition-all">
+                    <span className="flex items-center gap-1 text-sm text-gray-500 font-bold pl-4 pr-2 select-none border-r border-gray-200">
+                      <span className="inline-block w-4 h-2.5 bg-gradient-to-b from-[#FF9933] via-[#FFFFFF] to-[#128807] rounded-sm opacity-90" />
+                      +91
+                    </span>
+                    <input
+                      type="tel"
+                      required
+                      pattern="[0-9]{10}"
+                      value={formData.phone}
+                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                      placeholder="Enter Number"
+                      className="w-full bg-transparent px-3 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none"
+                    />
+                  </div>
+                </div>
+
+                {/* Action Submit Banner Button */}
+                <button
+                  type="submit"
+                  className="w-full rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white shadow-md hover:bg-gray-900 transition-colors duration-200 mt-2"
+                >
+                  Submit Now
+                </button>
+              </form>
+            ) : (
+              /* Success Confirmation Box Layout */
+              <div className="flex flex-col items-center justify-center text-center py-10 space-y-4 animate-scale-up">
+                <div className="h-16 w-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-sm">
+                  <CheckCircle2 className="h-8 w-8 stroke-[2.5]" />
+                </div>
+                <div className="space-y-1.5">
+                  <h3 className="text-lg font-bold text-gray-900 tracking-tight">Enquiry Received</h3>
+                  <p className="text-xs text-gray-500 max-w-xs leading-relaxed font-medium">
+                    Thank you for your interest. Your request has been logged successfully. An executive manager will contact you shortly with the premium brochure booklet details.
+                  </p>
+                </div>
+                <button
+                  onClick={() => setIsModalOpen(false)}
+                  className="mt-2 w-full rounded-xl bg-gray-950 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-sm hover:bg-gray-900 transition-colors"
+                >
+                  Dismiss Window
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
     </section>
   );
 }
