@@ -65,7 +65,7 @@ export default function Navbar() {
           {/* CTA Phone Button */}
           <div className="hidden sm:block">
             <a
-              href="tel:+917906062296"
+              href="tel:+919910374156"
               className="inline-flex items-center gap-2 rounded-xl px-5 py-3 text-xs font-bold uppercase tracking-widest text-[#dfc7a1] shadow-lg transition-all duration-300 transform hover:scale-[1.03] active:scale-[0.98]"
               style={{
                 backgroundColor: "#4a3621",
@@ -114,7 +114,7 @@ export default function Navbar() {
           ))}
           <div className="pt-6 px-4 sm:hidden">
             <a
-              href="tel:+917906062296"
+              href="tel:+919910374156"
               className="flex w-full items-center justify-center gap-2 rounded-xl py-4 text-xs font-bold uppercase tracking-widest text-[#dfc7a1] shadow-md active:scale-[0.98] transition-transform"
               style={{ backgroundColor: "#4a3621" }}
             >

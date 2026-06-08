@@ -36,8 +36,8 @@ export default function FloatingActions() {
     message: "",
   });
 
-  const phoneNumber = "+917906062296";
-  const whatsappNumber = "917906062296";
+  const phoneNumber = "+919910374156";
+  const whatsappNumber = "9170420 80055";
   const whatsappMessage = encodeURIComponent(
     "Hi, I am interested in Gaur Chrysalis. Please share the pricing sheet and availability status."
   );
