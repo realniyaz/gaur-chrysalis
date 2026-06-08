@@ -5,10 +5,10 @@ import React from "react";
 export default function Highlights() {
   // Pulling exact data points from your authorized project reference sheet
   const highlightItems = [
-    "Spread over 10.5 acres of prime land",
-    "Features 10 modern residential towers",
+    "Spread over 12 acres of prime land",
+    "Features 7 modern residential towers",
     "Over 50 lifestyle-focused amenities",
-    "Located just 12 minutes from Film City",
+    "Grand Clubhouse spread over 75,000 sq.ft.",
     "Only 15 minutes to Jewar International Airport",
     "Smart township planning & premium connectivity",
     "A new benchmark in luxury apartments in Sector 22D",

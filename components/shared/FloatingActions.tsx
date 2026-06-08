@@ -33,7 +33,7 @@ export default function FloatingActions() {
   // Comprehensive project knowledge base mapped out explicitly
   const projectKnowledge: Record<string, string> = {
     overview: "Gaur Chrysalis is a ultra-luxury residential enclave situated at Sector 22D, Yamuna Expressway. It features masterfully ventilated 3 & 4 BHK apartments with premium specifications and smart township layouts.",
-    pricing: "Our pricing structure starts at an exclusive rate of ₹ 8,499/- Sq.Ft.* for spacious 3 BHK models (Super Area: 1800 Sq. Ft.). Exact pricing metrics for 4 BHK model layouts are available directly on executive request.",
+    pricing: "Our pricing structure starts at an exclusive rate of ₹ 8,499/- Sq.Ft.* for spacious 3 BHK models (Super Area: 1625 Sq. Ft.). Exact pricing metrics for 4 BHK model ((Super Area: 1960 Sq. Ft.)).",
     location: "The project boasts exceptional connectivity matrices: located just 12 minutes from the upcoming Film City and a swift 15 minutes away from the Jewar International Airport, sitting right in the center of upcoming retail zones.",
     amenities: "Residents gain access to over 50 world-class amenities, including a luxury Swimming Pool complex, state-of-the-art Gymnasium, Meditation Zone, Amphitheatre, Reflexology Park, and a curated Sculpture Garden.",
     booking: "Pre-launch bookings are officially open with limited inventory benefits. You can lock in priority allocation slots by using the 'Call Now' floating dialer or sharing your contact metrics through our form panel.",

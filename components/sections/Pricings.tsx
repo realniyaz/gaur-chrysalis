@@ -31,13 +31,13 @@ export default function Pricing() {
     {
       type: "3 BHK Apartments",
       price: "₹ 8,499/- Sq.Ft.*",
-      size: "1800 Sq. ft.",
+      size: "1625 Sq. ft.",
       ctaText: "Request Pricing Details",
     },
     {
       type: "4 BHK Apartments",
       price: "₹ On Request",
-      size: "On Request",
+      size: "1960 Sq. ft.",
       ctaText: "Request Pricing Details",
     },
   ];

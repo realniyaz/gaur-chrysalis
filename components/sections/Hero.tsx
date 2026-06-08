@@ -13,8 +13,8 @@ interface FormDataState {
 export default function Hero() {
   // Array of images from your public folder for the cinematic background carousel
   const backgroundImages = [ 
-    "/banner1.png",  // Add your additional render images here
-    "/banner2.png"
+    "/banner.png",  // Add your additional render images here
+    "/banner_2.png"
   ];
 
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
@@ -85,9 +85,9 @@ export default function Hero() {
           {/* Quick Features Checklist */}
           <div className="space-y-3.5 pt-2 max-w-lg w-full">
             {[
-              "10.5 Acres Of Land",
-              "Premium Connectivity",
-              "Avail Best Offers & Discounts*",
+              "Total Land Parcel 12 Acre",
+              "No. of Towers: 7 Towers",
+              "Grand Clubhouse spread over 75,000 sq.ft.",
               "50+ World-Class Amenities"
             ].map((feature, idx) => (
               <div key={idx} className="flex items-center gap-3">

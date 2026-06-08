@@ -26,24 +26,26 @@ export default function Navbar() {
           {/* Brand/Logo Area (Linked to Home) */}
           <Link 
             href="/"
-            className="flex items-center gap-3 select-none group focus:outline-none"
+            className="flex items-center gap-2 sm:gap-3 select-none group focus:outline-none flex-shrink-0"
             aria-label="Return to homepage"
           >
-            <div className="flex flex-col">
-              <div className="flex items-baseline gap-1">
-                <span className="font-black text-2xl tracking-tighter text-gray-950 transition-colors group-hover:text-amber-700">
-                  G<span className="text-amber-700 group-hover:text-gray-950 transition-colors">A</span>URS
-                </span>
-              </div>
-              <span className="text-[9px] uppercase tracking-[0.2em] text-gray-400 -mt-1 font-bold">
-                your own world
-              </span>
+            {/* Integrated Official Logo Image Asset */}
+            <div className="relative h-10 sm:h-12 w-auto flex items-center">
+              <img
+                src="/logo.png"
+                alt="Gaursons Official Logo"
+                className="h-full w-auto object-contain transition-transform duration-300 group-hover:scale-[1.02]"
+              />
             </div>
-            <div className="h-8 w-px bg-gray-200 mx-1 hidden sm:block" />
-            <div className="flex flex-col hidden sm:flex">
-              <span className="text-[10px] font-black uppercase tracking-wider text-gray-800 leading-none">Authorised</span>
-              <span className="text-[10px] font-black uppercase tracking-wider text-gray-800 leading-none">Channel</span>
-              <span className="text-[10px] font-black uppercase tracking-wider text-gray-800 leading-none">Partner</span>
+
+            {/* Permanent Mandatory Regulatory Authorised Channel Partner Separation Line */}
+            <div className="h-8 w-px bg-gray-200 mx-0.5 sm:mx-1 block" />
+            
+            {/* Regulatory Brand Label Tag */}
+            <div className="flex flex-col text-left">
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-gray-800 leading-none">Authorised</span>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-gray-800 leading-none">Channel</span>
+              <span className="text-[9px] sm:text-[10px] font-black uppercase tracking-wider text-gray-800 leading-none">Partner</span>
             </div>
           </Link>
 

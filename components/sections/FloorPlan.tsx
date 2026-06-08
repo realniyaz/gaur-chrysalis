@@ -30,12 +30,12 @@ export default function FloorPlan() {
     {
       type: "3 BHK Apartments",
       src: "/Screenshot 2026-06-07 165553.png",
-      dim: "Super Area: 1800 Sq. Ft.",
+      dim: "Super Area: 1625 Sq. Ft.",
     },
     {
       type: "4 BHK Apartments",
       src: "/Screenshot 2026-06-07 165604.png",
-      dim: "Super Area: On Request",
+      dim: "Super Area: 1960 Sq. Ft.",
     },
   ];
 

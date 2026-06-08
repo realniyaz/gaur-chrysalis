@@ -14,7 +14,7 @@ export default function Overview() {
 
   const highlights = [
     "50+ world-class lifestyle amenities",
-    "Spread across 10.5 acres of prime land",
+    "Spread across 12 acres of prime land",
     "Excellent connectivity to Yamuna Expressway",
     "Spacious layouts with contemporary interiors",
     "Approx. 15 minutes from Jewar International Airport",
