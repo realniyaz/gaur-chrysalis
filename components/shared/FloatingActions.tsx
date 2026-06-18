@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { X, Send, CheckCircle2 } from "lucide-react";
+import { X, Send, CheckCircle2, Loader2 } from "lucide-react";
 
 interface Message {
   sender: "user" | "bot";
@@ -19,6 +19,7 @@ export default function FloatingActions() {
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isStickyModalOpen, setIsStickyModalOpen] = useState(false);
   const [isStickySubmitted, setIsStickySubmitted] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false); // 👈 Added loading state
   
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -86,9 +87,37 @@ export default function FloatingActions() {
     setInputValue("");
   };
 
-  const handleStickyFormSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // 🚀 LIVE POST OPERATION UPGRADE
+  const handleStickyFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsStickySubmitted(true);
+    setIsSubmitting(true);
+
+    try {
+      const response = await fetch("/api/enquiry", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          name: stickyFormData.name,
+          email: stickyFormData.email,
+          phone: `+91${stickyFormData.phone}`,
+          message: stickyFormData.message || "Lead submitted via Mobile Sticky Bar Modal",
+          context: "Mobile Floating Sticky Enquiry",
+        }),
+      });
+
+      if (response.ok) {
+        setIsStickySubmitted(true);
+      } else {
+        alert("Something went wrong. Please try again or use the Call alternative.");
+      }
+    } catch (error) {
+      console.error("Submission Error:", error);
+      alert("Network connectivity issue. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const openStickyModal = () => {
@@ -165,7 +194,6 @@ export default function FloatingActions() {
       {/* =========================================================================
           MOBILE VIEW COHESIVE SYSTEM LAYER (block lg:hidden)
           ========================================================================= */}
-      {/* 1. Dedicated Floating AI Bot Toggler Bubble for Mobile Viewports */}
       <div className="fixed bottom-18 right-4 z-40 block lg:hidden pointer-events-none">
         <button
           onClick={() => setIsChatOpen(!isChatOpen)}
@@ -175,9 +203,7 @@ export default function FloatingActions() {
         </button>
       </div>
 
-      {/* 2. Permanent Bottom Sticky Operational Nav Strip Bar */}
       <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-gray-200 lg:hidden flex h-14 w-full text-center shadow-lg select-none">
-        {/* PANEL A: CALL NOW LINK */}
         <a
           href={`tel:${phoneNumber}`}
           className="w-[35%] flex items-center justify-center gap-2 font-bold uppercase tracking-wider text-xs text-gray-900 border-r border-gray-100"
@@ -190,7 +216,6 @@ export default function FloatingActions() {
           <span>Call</span>
         </a>
 
-        {/* PANEL B: MODAL FORM SHEET ENQUIRE ACTION */}
         <button
           onClick={openStickyModal}
           className="w-[35%] flex items-center justify-center gap-2 font-bold uppercase tracking-wider text-xs text-gray-900 border-r border-gray-100"
@@ -203,7 +228,6 @@ export default function FloatingActions() {
           <span>Enquire</span>
         </button>
 
-        {/* PANEL C: WHATSAPP DIRECT PATHWAY ROW */}
         <a
           href={`https://wa.me/${whatsappNumber}?text=${whatsappMessage}`}
           target="_blank"
@@ -225,20 +249,29 @@ export default function FloatingActions() {
             
             <div className="flex items-center justify-between border-b border-gray-100 pb-4">
               <h3 className="text-lg font-bold text-gray-900 tracking-tight">Get More Details Enquire Now</h3>
-              <button onClick={() => setIsStickyModalOpen(false)} className="p-1 rounded-md text-gray-400 hover:text-gray-900 hover:bg-gray-100"><X className="h-5 w-5 stroke-[2.5]" /></button>
+              <button onClick={() => setIsStickyModalOpen(false)} disabled={isSubmitting} className="p-1 rounded-md text-gray-400 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-50"><X className="h-5 w-5 stroke-[2.5]" /></button>
             </div>
 
             {!isStickySubmitted ? (
               <form onSubmit={handleStickyFormSubmit} className="space-y-4">
-                <input type="text" required placeholder="Enter Name" value={stickyFormData.name} onChange={(e) => setStickyFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all" />
-                <input type="email" required placeholder="Enter Email" value={stickyFormData.email} onChange={(e) => setStickyFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all" />
+                <input type="text" required disabled={isSubmitting} placeholder="Enter Name" value={stickyFormData.name} onChange={(e) => setStickyFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all disabled:bg-gray-50 disabled:text-gray-400" />
+                <input type="email" required disabled={isSubmitting} placeholder="Enter Email" value={stickyFormData.email} onChange={(e) => setStickyFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all disabled:bg-gray-50 disabled:text-gray-400" />
                 <div className="relative flex items-center border border-gray-300 rounded-xl bg-white focus-within:ring-2 focus-within:ring-gray-900 transition-all">
                   <span className="flex items-center gap-1 text-sm text-gray-500 font-bold pl-4 pr-2 select-none border-r border-gray-200">
                     <span className="inline-block w-4 h-2.5 bg-gradient-to-b from-[#FF9933] via-[#FFFFFF] to-[#128807] rounded-sm opacity-90" /> +91
                   </span>
-                  <input type="tel" required pattern="[0-9]{10}" placeholder="Enter Number" value={stickyFormData.phone} onChange={(e) => setStickyFormData(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-transparent px-3 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none" />
+                  <input type="tel" required pattern="[0-9]{10}" disabled={isSubmitting} placeholder="Enter Number" value={stickyFormData.phone} onChange={(e) => setStickyFormData(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-transparent px-3 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none disabled:text-gray-400" />
                 </div>
-                <button type="submit" className="w-full rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white hover:bg-gray-900 transition-colors mt-2">Submit Now</button>
+                <button type="submit" disabled={isSubmitting} className="w-full flex items-center justify-center gap-2 rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white hover:bg-gray-900 transition-colors mt-2 disabled:bg-gray-700">
+                  {isSubmitting ? (
+                    <>
+                      <Loader2 className="h-4 w-4 animate-spin" />
+                      <span>Sending...</span>
+                    </>
+                  ) : (
+                    <span>Submit Now</span>
+                  )}
+                </button>
               </form>
             ) : (
               <div className="flex flex-col items-center justify-center text-center py-10 space-y-4 animate-scale-up">
