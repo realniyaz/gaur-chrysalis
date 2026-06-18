@@ -2,15 +2,15 @@
 import { NextResponse } from "next/server";
 import { Resend } from "resend";
 
-// Initialize Resend with your protected background API token
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 export async function POST(request: Request) {
   try {
+    // 1. Initialize Resend inside the request lifecycle to protect build optimization pipelines
+    const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder_for_builds");
+
     const body = await request.json();
     const { name, email, phone, message, context } = body;
 
-    // 1. Core Validation Guard Checks
+    // 2. Core Validation Guard Checks
     if (!name || !phone) {
       return NextResponse.json(
         { error: "Name and Contact Number fields are required." },
@@ -18,17 +18,15 @@ export async function POST(request: Request) {
       );
     }
 
-    // 2. Format a Premium Real Estate Lead Email HTML Layout
-    const emailHtmlHtml = `
+    const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
         <div style="background-color: #261a0f; padding: 24px; text-align: center; border-bottom: 2px solid #dfc7a1;">
-          <h2 style="color: #dfc7a1; margin: 0; text-transform: uppercase; tracking-spacing: 2px; font-size: 20px;">RealtyFM Lead Notification</h2>
+          <h2 style="color: #dfc7a1; margin: 0; text-transform: uppercase; letter-spacing: 2px; font-size: 20px;">RealtyFM Lead Notification</h2>
           <p style="color: #ffffff; margin: 4px 0 0 0; font-size: 12px; font-weight: bold; opacity: 0.8;">Project Source: Gaur Chrysalis Portal</p>
         </div>
         
-        <div style="padding: 24px; bg-color: #ffffff;">
+        <div style="padding: 24px; background-color: #ffffff;">
           <h3 style="color: #1c1c1c; margin-top: 0; border-bottom: 1px solid #f0f0f0; padding-bottom: 8px;">Prospect Details:</h3>
-          
           <table style="width: 100%; border-collapse: collapse; margin-bottom: 20px;">
             <tr>
               <td style="padding: 10px 0; color: #666; font-size: 13px; font-weight: bold; width: 30%;">Full Name:</td>
@@ -57,21 +55,22 @@ export async function POST(request: Request) {
             ${message || "No additional message parameters added by user."}
           </div>
         </div>
-
         <div style="background-color: #fafafa; padding: 16px; text-align: center; border-top: 1px solid #eaeaea; color: #888; font-size: 11px;">
           This tracking alert was routed autonomously on behalf of your Next.js application stack.
         </div>
       </div>
     `;
 
-    // 3. Dispatch the Email with Resend API Configuration
-    // NOTE: If you haven't verified a custom domain on your Resend dashboard yet,
-    // you MUST use 'onboarding@resend.dev' as the "from" address to test initially.
+    // 3. Double Check Key Presence at runtime execution phase
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("Missing runtime server environment variables.");
+    }
+
     await resend.emails.send({
       from: "Gaur Lead Portal <onboarding@resend.dev>",
       to: ["realtyfmleads@gmail.com"],
       subject: `🚨 New Lead: ${name} (${context || "Gaur Chrysalis Enquiry"})`,
-      html: emailHtmlHtml,
+      html: emailHtml,
     });
 
     return NextResponse.json({ success: true, message: "Lead dispatched safely." }, { status: 200 });
