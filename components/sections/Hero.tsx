@@ -19,8 +19,11 @@ export default function Hero() {
 
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
   const [isInlineSubmitted, setIsInlineSubmitted] = useState(false);
+  const [isInlineLoading, setIsInlineLoading] = useState(false);
+  
   const [isBrochureModalOpen, setIsBrochureModalOpen] = useState(false);
   const [isBrochureSubmitted, setIsBrochureSubmitted] = useState(false);
+  const [isBrochureLoading, setIsBrochureLoading] = useState(false);
 
   const [inlineFormData, setInlineFormData] = useState<FormDataState>({
     name: "",
@@ -44,14 +47,70 @@ export default function Hero() {
     return () => clearInterval(interval);
   }, [backgroundImages.length]);
 
-  const handleInlineSubmit = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault();
-    setIsInlineSubmitted(true);
+  // Unified wrapper to fire Google Ads Lead Conversion tracking securely
+  const fireConversionEvent = () => {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag('event', 'conversion', {
+        'send_to': 'AW-18243414829/S1AyCPOR0sAcEK3WkftD'
+      });
+      console.log("🎯 Google Conversion snippet executed successfully.");
+    }
   };
 
-  const handleBrochureSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // Handle Desktop Sidebar & Mobile Inline form submissions
+  const handleInlineSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsBrochureSubmitted(true);
+    setIsInlineLoading(true);
+
+    try {
+      const response = await fetch("/api/enquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...inlineFormData,
+          context: "Hero Quick Enquiry Form",
+        }),
+      });
+
+      if (response.ok) {
+        setIsInlineSubmitted(true);
+        fireConversionEvent(); // Trigger Google Tracking snippet
+      } else {
+        alert("Something went wrong. Please try connecting via call or WhatsApp.");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+    } finally {
+      setIsInlineLoading(false);
+    }
+  };
+
+  // Handle Pop-up Brochure form submissions
+  const handleBrochureSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsBrochureLoading(true);
+
+    try {
+      const response = await fetch("/api/enquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...brochureFormData,
+          context: "Hero Brochure Download Modal Request",
+        }),
+      });
+
+      if (response.ok) {
+        setIsBrochureSubmitted(true);
+        fireConversionEvent(); // Trigger Google Tracking snippet
+      } else {
+        alert("Something went wrong. Please try connecting via call or WhatsApp.");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+    } finally {
+      setIsBrochureLoading(false);
+    }
   };
 
   const openBrochureModal = () => {
@@ -117,7 +176,9 @@ export default function Hero() {
                   <input type="email" required placeholder="Email Address" value={inlineFormData.email} onChange={(e) => setInlineFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full bg-transparent border-b border-gray-400 py-2.5 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-[#dfc7a1]" />
                   <div className="flex items-center border-b border-gray-400 focus-within:border-[#dfc7a1] text-white"><span className="text-sm text-gray-300 pr-1.5 select-none">+91</span><input type="tel" required pattern="[0-9]{10}" placeholder="Contact Number" value={inlineFormData.phone} onChange={(e) => setInlineFormData(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-transparent py-2.5 text-sm focus:outline-none" /></div>
                   <textarea rows={2} placeholder="Message" value={inlineFormData.message} onChange={(e) => setInlineFormData(prev => ({ ...prev, message: e.target.value }))} className="w-full bg-transparent border-b border-gray-400 py-2.5 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-[#dfc7a1] resize-none" />
-                  <button type="submit" className="w-full rounded-full bg-[#dfc7a1] py-3.5 text-sm font-bold uppercase text-gray-900 shadow-lg hover:bg-[#d1b48c] transition-all">Submit</button>
+                  <button type="submit" disabled={isInlineLoading} className="w-full rounded-full bg-[#dfc7a1] py-3.5 text-sm font-bold uppercase text-gray-900 shadow-lg hover:bg-[#d1b48c] transition-all disabled:opacity-50">
+                    {isInlineLoading ? "Sending..." : "Submit"}
+                  </button>
                 </form>
               ) : (
                 <div className="text-center py-10 space-y-3"><div className="h-12 w-12 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl flex items-center justify-center mx-auto"><CheckCircle2 className="h-6 w-6" /></div><p className="text-sm font-bold text-white">Sent Successfully!</p></div>
@@ -192,7 +253,9 @@ export default function Hero() {
                 <input type="email" required placeholder="Email Address" value={inlineFormData.email} onChange={(e) => setInlineFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full bg-transparent border-b border-gray-200 py-2.5 text-xs font-semibold text-gray-900 focus:outline-none focus:border-amber-700" />
                 <div className="flex items-center border-b border-gray-200 focus-within:border-amber-700"><span className="text-xs text-gray-400 font-bold pr-1.5 select-none">+91</span><input type="tel" required pattern="[0-9]{10}" placeholder="Contact Number" value={inlineFormData.phone} onChange={(e) => setInlineFormData(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-transparent py-2.5 text-xs font-semibold text-gray-900 focus:outline-none" /></div>
                 <textarea rows={1} placeholder="Message" value={inlineFormData.message} onChange={(e) => setInlineFormData(prev => ({ ...prev, message: e.target.value }))} className="w-full bg-transparent border-b border-gray-200 py-2.5 text-xs font-semibold text-gray-900 focus:outline-none focus:border-amber-700 resize-none" />
-                <button type="submit" className="w-full rounded-xl bg-gradient-to-r from-[#3a2a1a] to-[#5a4229] py-3.5 text-xs font-bold uppercase tracking-widest text-[#dfc7a1] shadow-md mt-1">Submit Form</button>
+                <button type="submit" disabled={isInlineLoading} className="w-full rounded-xl bg-gradient-to-r from-[#3a2a1a] to-[#5a4229] py-3.5 text-xs font-bold uppercase tracking-widest text-[#dfc7a1] shadow-md mt-1 disabled:opacity-50">
+                  {isInlineLoading ? "Sending..." : "Submit Form"}
+                </button>
               </form>
             ) : (
               <div className="text-center py-6 space-y-3 animate-scale-up">
@@ -274,9 +337,10 @@ export default function Hero() {
                 {/* Action Submit Banner Button */}
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white shadow-md hover:bg-gray-900 transition-colors duration-200 mt-2"
+                  disabled={isBrochureLoading}
+                  className="w-full rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white shadow-md hover:bg-gray-900 transition-colors duration-200 mt-2 disabled:opacity-50"
                 >
-                  Submit Now
+                  {isBrochureLoading ? "Sending..." : "Submit Now"}
                 </button>
               </form>
             ) : (

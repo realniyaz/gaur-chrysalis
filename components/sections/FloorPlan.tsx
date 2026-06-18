@@ -19,6 +19,7 @@ interface ModalFormState {
 export default function FloorPlan() {
   const [selectedPlan, setSelectedPlan] = useState<string | null>(null);
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<ModalFormState>({
     name: "",
     email: "",
@@ -50,9 +51,41 @@ export default function FloorPlan() {
     setIsSubmitted(false);
   };
 
-  const handleModalSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // Wrapper to trigger Google Ads tracking event upon valid form confirmation
+  const fireConversionEvent = () => {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag('event', 'conversion', {
+        'send_to': 'AW-18243414829/S1AyCPOR0sAcEK3WkftD'
+      });
+      console.log("🎯 FloorPlan Google Conversion event logged successfully.");
+    }
+  };
+
+  const handleModalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    setIsSubmitted(true);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/enquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          context: `Floor Plan Request - ${selectedPlan}`,
+        }),
+      });
+
+      if (response.ok) {
+        setIsSubmitted(true);
+        fireConversionEvent();
+      } else {
+        alert("Something went wrong. Please try connecting via call or WhatsApp.");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -183,9 +216,10 @@ export default function FloorPlan() {
                 {/* Action Submit Banner Button */}
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white shadow-md hover:bg-gray-900 transition-colors duration-200 mt-2"
+                  disabled={isLoading}
+                  className="w-full rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white shadow-md hover:bg-gray-900 transition-colors duration-200 mt-2 disabled:opacity-50"
                 >
-                  Submit Now
+                  {isLoading ? "Sending..." : "Submit Now"}
                 </button>
               </form>
             ) : (

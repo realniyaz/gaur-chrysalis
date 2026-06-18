@@ -18,11 +18,43 @@ export default function FooterContact() {
     message: "",
   });
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  // Wrapper to trigger Google Ads tracking event upon valid form confirmation
+  const fireConversionEvent = () => {
+    if (typeof window !== "undefined" && (window as any).gtag) {
+      (window as any).gtag('event', 'conversion', {
+        'send_to': 'AW-18243414829/S1AyCPOR0sAcEK3WkftD'
+      });
+      console.log("🎯 Footer Section Google Conversion event logged successfully.");
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("Corporate Deal Enquiry Submitted:", formData);
-    setIsSubmitted(true);
+    setIsLoading(true);
+
+    try {
+      const response = await fetch("/api/enquiry", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          context: "Footer Corporate Contact Form",
+        }),
+      });
+
+      if (response.ok) {
+        setIsSubmitted(true);
+        fireConversionEvent();
+      } else {
+        alert("Something went wrong. Please try connecting via call or WhatsApp.");
+      }
+    } catch (error) {
+      console.error("Submission error:", error);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -53,7 +85,7 @@ export default function FooterContact() {
                 Known for its customer-first approach, Gaursons India focuses on quality,
                 transparency, and timely delivery in every development. Recognized among the top
                 real estate developers in Noida and Greater Noida West, Gaurs Group stands out for
-                 its exceptional construction standards, advanced building technologies, and
+                its exceptional construction standards, advanced building technologies, and
                 dedicated professional team. The company has made a remarkable impact across
                 multiple sectors, including residential, commercial, retail, hospitality, healthcare, and
                 education.
@@ -158,9 +190,10 @@ export default function FooterContact() {
                 {/* Submit Action Handle Button */}
                 <button
                   type="submit"
-                  className="w-full rounded-xl bg-gradient-to-r from-[#3a2a1a] to-[#5a4229] py-3.5 text-xs font-bold uppercase tracking-widest text-[#dfc7a1] shadow-lg transition-all duration-300 hover:from-[#46331f] hover:to-[#6b5033] hover:scale-[1.01] active:scale-[0.99] mt-4"
+                  disabled={isLoading}
+                  className="w-full rounded-xl bg-gradient-to-r from-[#3a2a1a] to-[#5a4229] py-3.5 text-xs font-bold uppercase tracking-widest text-[#dfc7a1] shadow-lg transition-all duration-300 hover:from-[#46331f] hover:to-[#6b5033] hover:scale-[1.01] active:scale-[0.99] mt-4 disabled:opacity-50"
                 >
-                  Submit Form
+                  {isLoading ? "Sending..." : "Submit Form"}
                 </button>
               </form>
             </div>
