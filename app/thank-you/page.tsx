@@ -7,7 +7,7 @@ import { CheckCircle2, ArrowLeft, Phone, MessageSquareQuote } from "lucide-react
 
 export default function ThankYouPage() {
   const phoneNumber = "+919910374156";
-  const whatsappNumber = "+919910374156";
+  const whatsappNumber = "917042080055";
   const whatsappMessage = encodeURIComponent(
     "Hi, I just submitted an enquiry on your portal for Gaur Chrysalis. Please share the pricing sheet, configuration options, and inventory updates immediately."
   );

@@ -155,7 +155,7 @@ export default function Hero() {
             </div>
             <div className="pt-4 flex items-center gap-4">
               <div className="bg-[#dfc7a1] px-6 py-3.5 rounded shadow-xl inline-flex items-center justify-center">
-                <span className="text-lg font-extrabold text-gray-900 tracking-wide">₹ Starts From: 8,499/- Sq.Ft.*</span>
+                <span className="text-lg font-extrabold text-gray-900 tracking-wide">Starts From ₹ 1.39 Cr*</span>
               </div>
               <button onClick={openBrochureModal} className="inline-flex items-center gap-2 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 px-5 py-3.5 text-xs font-bold uppercase tracking-widest text-white hover:bg-white/20 transition-all">
                 <Download className="h-4 w-4" /> Download Brochure

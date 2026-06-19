@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { X, CheckCircle2 } from "lucide-react";
+import { useRouter } from "next/navigation"; // 👈 Imported Next.js App Router Hook
+import { X } from "lucide-react";
 
 interface PricingTier {
   type: string;
@@ -18,8 +19,8 @@ interface ModalFormState {
 }
 
 export default function Pricing() {
+  const router = useRouter(); // 👈 Initialized client router container
   const [selectedTier, setSelectedTier] = useState<string | null>(null);
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [formData, setFormData] = useState<ModalFormState>({
     name: "",
@@ -31,37 +32,25 @@ export default function Pricing() {
   const customPricingData: PricingTier[] = [
     {
       type: "3 BHK Apartments",
-      price: "₹ 8,499/- Sq.Ft.*",
+      price: "₹ 1.39 Cr* (₹ 8,499/- Sq.Ft.)", // 👈 Clean, presentable price line update
       size: "1625 Sq. ft.",
-      ctaText: "Request Pricing Details",
+      ctaText: "Download Floor Plan",
     },
     {
       type: "4 BHK Apartments",
       price: "₹ On Request",
       size: "1960 Sq. ft.",
-      ctaText: "Request Pricing Details",
+      ctaText: "Download Floor Plan",
     },
   ];
 
   const openFormModal = (tierType: string) => {
     setSelectedTier(tierType);
-    setIsSubmitted(false);
     setFormData({ name: "", email: "", phone: "", message: "" });
   };
 
   const closeFormModal = () => {
     setSelectedTier(null);
-    setIsSubmitted(false);
-  };
-
-  // Wrapper to trigger Google Ads tracking event upon valid form confirmation
-  const fireConversionEvent = () => {
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag('event', 'conversion', {
-        'send_to': 'AW-18243414829/S1AyCPOR0sAcEK3WkftD'
-      });
-      console.log("🎯 Pricing Section Google Conversion event logged successfully.");
-    }
   };
 
   const handleModalSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
@@ -73,19 +62,23 @@ export default function Pricing() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          email: formData.email,
+          phone: `+91${formData.phone}`,
+          message: formData.message || `Pricing Request for ${selectedTier}`,
           context: `Pricing Request - ${selectedTier}`,
         }),
       });
 
       if (response.ok) {
-        setIsSubmitted(true);
-        fireConversionEvent();
+        closeFormModal(); // Close modal overlay window seamlessly
+        router.push("/thank-you"); // 🚀 Direct redirect path setup to hit tracking codes
       } else {
         alert("Something went wrong. Please try connecting via call or WhatsApp.");
       }
     } catch (error) {
       console.error("Submission error:", error);
+      alert("Network connectivity issue. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -137,7 +130,7 @@ export default function Pricing() {
                   <span className="text-xs font-bold text-gray-400 uppercase tracking-widest">
                     Price
                   </span>
-                  <span className="text-2xl font-black text-gray-900 tracking-tight">
+                  <span className="text-xl font-black text-gray-900 tracking-tight text-right sm:text-2xl">
                     {tier.price}
                   </span>
                 </div>
@@ -180,87 +173,70 @@ export default function Pricing() {
               </h3>
               <button 
                 onClick={closeFormModal}
-                className="p-1 rounded-md text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none"
+                disabled={isLoading}
+                className="p-1 rounded-md text-gray-400 hover:text-gray-900 hover:bg-gray-100 transition-colors focus:outline-none disabled:opacity-50"
                 aria-label="Close form window"
               >
                 <X className="h-5 w-5 stroke-[2.5]" />
               </button>
             </div>
 
-            {!isSubmitted ? (
-              <form onSubmit={handleModalSubmit} className="space-y-4">
-                {/* Name Input Box */}
-                <div className="flex flex-col space-y-1">
-                  <input
-                    type="text"
-                    required
-                    value={formData.name}
-                    onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter Name"
-                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-                  />
-                </div>
-
-                {/* Email Input Box */}
-                <div className="flex flex-col space-y-1">
-                  <input
-                    type="email"
-                    required
-                    value={formData.email}
-                    onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="Enter Email"
-                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-                  />
-                </div>
-
-                {/* Contact Phone Input Box with Integrated ISD Extension */}
-                <div className="flex flex-col space-y-1">
-                  <div className="relative flex items-center border border-gray-300 rounded-xl bg-white focus-within:ring-2 focus-within:ring-gray-900 focus-within:border-transparent transition-all">
-                    <span className="flex items-center gap-1 text-sm text-gray-500 font-bold pl-4 pr-2 select-none border-r border-gray-200">
-                      <span className="inline-block w-4 h-2.5 bg-gradient-to-b from-[#FF9933] via-[#FFFFFF] to-[#128807] rounded-sm opacity-90" />
-                      +91
-                    </span>
-                    <input
-                      type="tel"
-                      required
-                      pattern="[0-9]{10}"
-                      value={formData.phone}
-                      onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                      placeholder="Enter Number"
-                      className="w-full bg-transparent px-3 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Action Submit Banner Button */}
-                <button
-                  type="submit"
+            <form onSubmit={handleModalSubmit} className="space-y-4">
+              {/* Name Input Box */}
+              <div className="flex flex-col space-y-1">
+                <input
+                  type="text"
+                  required
                   disabled={isLoading}
-                  className="w-full rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white shadow-md hover:bg-gray-900 transition-colors duration-200 mt-2 disabled:opacity-50"
-                >
-                  {isLoading ? "Sending..." : "Submit Now"}
-                </button>
-              </form>
-            ) : (
-              /* Re-styled Success Resolution State Box */
-              <div className="flex flex-col items-center justify-center text-center py-10 space-y-4 animate-scale-up">
-                <div className="h-16 w-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-sm">
-                  <CheckCircle2 className="h-8 w-8 stroke-[2.5]" />
-                </div>
-                <div className="space-y-1.5">
-                  <h3 className="text-lg font-bold text-gray-900 tracking-tight">Enquiry Received</h3>
-                  <p className="text-xs text-gray-500 max-w-xs leading-relaxed font-medium">
-                    Thank you for your interest in our {selectedTier} inventory. Your query details have been submitted successfully. An executive manager will connect with you shortly with comprehensive rate cards.
-                  </p>
-                </div>
-                <button
-                  onClick={closeFormModal}
-                  className="mt-2 w-full rounded-xl bg-gray-950 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-sm hover:bg-gray-900 transition-colors"
-                >
-                  Dismiss Window
-                </button>
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter Name"
+                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all disabled:bg-gray-50"
+                />
               </div>
-            )}
+
+              {/* Email Input Box */}
+              <div className="flex flex-col space-y-1">
+                <input
+                  type="email"
+                  required
+                  disabled={isLoading}
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="Enter Email"
+                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all disabled:bg-gray-50"
+                />
+              </div>
+
+              {/* Contact Phone Input Box with Integrated ISD Extension */}
+              <div className="flex flex-col space-y-1">
+                <div className="relative flex items-center border border-gray-300 rounded-xl bg-white focus-within:ring-2 focus-within:ring-gray-900 focus-within:border-transparent transition-all">
+                  <span className="flex items-center gap-1 text-sm text-gray-500 font-bold pl-4 pr-2 select-none border-r border-gray-200">
+                    <span className="inline-block w-4 h-2.5 bg-gradient-to-b from-[#FF9933] via-[#FFFFFF] to-[#128807] rounded-sm opacity-90" />
+                    +91
+                  </span>
+                  <input
+                    type="tel"
+                    required
+                    pattern="[0-9]{10}"
+                    disabled={isLoading}
+                    value={formData.phone}
+                    onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="Enter Number"
+                    className="w-full bg-transparent px-3 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none disabled:bg-gray-50"
+                  />
+                </div>
+              </div>
+
+              {/* Action Submit Banner Button */}
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white shadow-md hover:bg-gray-900 transition-colors duration-200 mt-2 disabled:bg-gray-700"
+              >
+                {isLoading ? "Sending..." : "Submit Now"}
+              </button>
+            </form>
           </div>
         </div>
       )}
