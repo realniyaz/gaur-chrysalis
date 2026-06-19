@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect } from "react";
-import { MapPin, Download, X, CheckCircle2 } from "lucide-react";
+import { useRouter } from "next/navigation"; // 👈 Imported Next.js App Router Hook
+import { MapPin, Download, X } from "lucide-react";
 
 interface FormDataState {
   name: string;
@@ -11,6 +12,7 @@ interface FormDataState {
 }
 
 export default function Hero() {
+  const router = useRouter(); // 👈 Initialized client router container
   const backgroundImages = [
     "/1banner.jpg",
     "/2banner.jpg",
@@ -18,11 +20,8 @@ export default function Hero() {
   ];
 
   const [currentImgIndex, setCurrentImgIndex] = useState(0);
-  const [isInlineSubmitted, setIsInlineSubmitted] = useState(false);
   const [isInlineLoading, setIsInlineLoading] = useState(false);
-  
   const [isBrochureModalOpen, setIsBrochureModalOpen] = useState(false);
-  const [isBrochureSubmitted, setIsBrochureSubmitted] = useState(false);
   const [isBrochureLoading, setIsBrochureLoading] = useState(false);
 
   const [inlineFormData, setInlineFormData] = useState<FormDataState>({
@@ -47,16 +46,6 @@ export default function Hero() {
     return () => clearInterval(interval);
   }, [backgroundImages.length]);
 
-  // Unified wrapper to fire Google Ads Lead Conversion tracking securely
-  const fireConversionEvent = () => {
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag('event', 'conversion', {
-        'send_to': 'AW-18243414829/S1AyCPOR0sAcEK3WkftD'
-      });
-      console.log("🎯 Google Conversion snippet executed successfully.");
-    }
-  };
-
   // Handle Desktop Sidebar & Mobile Inline form submissions
   const handleInlineSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -67,19 +56,23 @@ export default function Hero() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...inlineFormData,
+          name: inlineFormData.name,
+          email: inlineFormData.email,
+          phone: `+91${inlineFormData.phone}`,
+          message: inlineFormData.message || "No custom message provided.",
           context: "Hero Quick Enquiry Form",
         }),
       });
 
       if (response.ok) {
-        setIsInlineSubmitted(true);
-        fireConversionEvent(); // Trigger Google Tracking snippet
+        // 🚀 Native Router Push Redirect replaces local state handles completely
+        router.push("/thank-you");
       } else {
         alert("Something went wrong. Please try connecting via call or WhatsApp.");
       }
     } catch (error) {
       console.error("Submission error:", error);
+      alert("Network connectivity issue. Please try again.");
     } finally {
       setIsInlineLoading(false);
     }
@@ -95,26 +88,29 @@ export default function Hero() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...brochureFormData,
+          name: brochureFormData.name,
+          email: brochureFormData.email,
+          phone: `+91${brochureFormData.phone}`,
+          message: brochureFormData.message || "Brochure asset request payload",
           context: "Hero Brochure Download Modal Request",
         }),
       });
 
       if (response.ok) {
-        setIsBrochureSubmitted(true);
-        fireConversionEvent(); // Trigger Google Tracking snippet
+        setIsBrochureModalOpen(false); // Close operational overlay container frame
+        router.push("/thank-you");    // 🚀 Execute redirect to the script page layout
       } else {
         alert("Something went wrong. Please try connecting via call or WhatsApp.");
       }
     } catch (error) {
       console.error("Submission error:", error);
+      alert("Network connectivity issue. Please try again.");
     } finally {
       setIsBrochureLoading(false);
     }
   };
 
   const openBrochureModal = () => {
-    setIsBrochureSubmitted(false);
     setBrochureFormData({ name: "", email: "", phone: "", message: "" });
     setIsBrochureModalOpen(true);
   };
@@ -170,19 +166,15 @@ export default function Hero() {
           <div className="col-span-5 w-full max-w-md ml-auto">
             <div className="backdrop-blur-xl bg-black/40 border border-white/10 rounded-2xl p-8 shadow-2xl flex flex-col space-y-6">
               <div className="text-center"><h3 className="text-lg font-bold uppercase tracking-wider text-white">Quick Enquiry!</h3><div className="h-0.5 w-12 bg-[#dfc7a1] mx-auto mt-2 rounded-full" /></div>
-              {!isInlineSubmitted ? (
-                <form onSubmit={handleInlineSubmit} className="space-y-5">
-                  <input type="text" required placeholder="Name" value={inlineFormData.name} onChange={(e) => setInlineFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full bg-transparent border-b border-gray-400 py-2.5 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-[#dfc7a1]" />
-                  <input type="email" required placeholder="Email Address" value={inlineFormData.email} onChange={(e) => setInlineFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full bg-transparent border-b border-gray-400 py-2.5 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-[#dfc7a1]" />
-                  <div className="flex items-center border-b border-gray-400 focus-within:border-[#dfc7a1] text-white"><span className="text-sm text-gray-300 pr-1.5 select-none">+91</span><input type="tel" required pattern="[0-9]{10}" placeholder="Contact Number" value={inlineFormData.phone} onChange={(e) => setInlineFormData(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-transparent py-2.5 text-sm focus:outline-none" /></div>
-                  <textarea rows={2} placeholder="Message" value={inlineFormData.message} onChange={(e) => setInlineFormData(prev => ({ ...prev, message: e.target.value }))} className="w-full bg-transparent border-b border-gray-400 py-2.5 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-[#dfc7a1] resize-none" />
-                  <button type="submit" disabled={isInlineLoading} className="w-full rounded-full bg-[#dfc7a1] py-3.5 text-sm font-bold uppercase text-gray-900 shadow-lg hover:bg-[#d1b48c] transition-all disabled:opacity-50">
-                    {isInlineLoading ? "Sending..." : "Submit"}
-                  </button>
-                </form>
-              ) : (
-                <div className="text-center py-10 space-y-3"><div className="h-12 w-12 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded-xl flex items-center justify-center mx-auto"><CheckCircle2 className="h-6 w-6" /></div><p className="text-sm font-bold text-white">Sent Successfully!</p></div>
-              )}
+              <form onSubmit={handleInlineSubmit} className="space-y-5">
+                <input type="text" required placeholder="Name" value={inlineFormData.name} onChange={(e) => setInlineFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full bg-transparent border-b border-gray-400 py-2.5 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-[#dfc7a1]" />
+                <input type="email" required placeholder="Email Address" value={inlineFormData.email} onChange={(e) => setInlineFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full bg-transparent border-b border-gray-400 py-2.5 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-[#dfc7a1]" />
+                <div className="flex items-center border-b border-gray-400 focus-within:border-[#dfc7a1] text-white"><span className="text-sm text-gray-300 pr-1.5 select-none">+91</span><input type="tel" required pattern="[0-9]{10}" placeholder="Contact Number" value={inlineFormData.phone} onChange={(e) => setInlineFormData(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-transparent py-2.5 text-sm focus:outline-none" /></div>
+                <textarea rows={2} placeholder="Message" value={inlineFormData.message} onChange={(e) => setInlineFormData(prev => ({ ...prev, message: e.target.value }))} className="w-full bg-transparent border-b border-gray-400 py-2.5 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-[#dfc7a1] resize-none" />
+                <button type="submit" disabled={isInlineLoading} className="w-full rounded-full bg-[#dfc7a1] py-3.5 text-sm font-bold uppercase text-gray-900 shadow-lg hover:bg-[#d1b48c] transition-all disabled:opacity-50">
+                  {isInlineLoading ? "Sending..." : "Submit"}
+                </button>
+              </form>
             </div>
           </div>
         </div>
@@ -247,35 +239,27 @@ export default function Hero() {
               <div className="h-0.5 w-10 bg-amber-700 mx-auto mt-1.5 rounded-full" />
             </div>
 
-            {!isInlineSubmitted ? (
-              <form onSubmit={handleInlineSubmit} className="space-y-4">
-                <input type="text" required placeholder="Name" value={inlineFormData.name} onChange={(e) => setInlineFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full bg-transparent border-b border-gray-200 py-2.5 text-xs font-semibold text-gray-900 focus:outline-none focus:border-amber-700" />
-                <input type="email" required placeholder="Email Address" value={inlineFormData.email} onChange={(e) => setInlineFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full bg-transparent border-b border-gray-200 py-2.5 text-xs font-semibold text-gray-900 focus:outline-none focus:border-amber-700" />
-                <div className="flex items-center border-b border-gray-200 focus-within:border-amber-700"><span className="text-xs text-gray-400 font-bold pr-1.5 select-none">+91</span><input type="tel" required pattern="[0-9]{10}" placeholder="Contact Number" value={inlineFormData.phone} onChange={(e) => setInlineFormData(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-transparent py-2.5 text-xs font-semibold text-gray-900 focus:outline-none" /></div>
-                <textarea rows={1} placeholder="Message" value={inlineFormData.message} onChange={(e) => setInlineFormData(prev => ({ ...prev, message: e.target.value }))} className="w-full bg-transparent border-b border-gray-200 py-2.5 text-xs font-semibold text-gray-900 focus:outline-none focus:border-amber-700 resize-none" />
-                <button type="submit" disabled={isInlineLoading} className="w-full rounded-xl bg-gradient-to-r from-[#3a2a1a] to-[#5a4229] py-3.5 text-xs font-bold uppercase tracking-widest text-[#dfc7a1] shadow-md mt-1 disabled:opacity-50">
-                  {isInlineLoading ? "Sending..." : "Submit Form"}
-                </button>
-              </form>
-            ) : (
-              <div className="text-center py-6 space-y-3 animate-scale-up">
-                <div className="h-12 w-12 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 border border-emerald-100 mx-auto"><CheckCircle2 className="h-5 w-5 stroke-[2.5]" /></div>
-                <p className="text-xs font-bold text-gray-900">Enquiry Sent Successfully!</p>
-              </div>
-            )}
+            <form onSubmit={handleInlineSubmit} className="space-y-4">
+              <input type="text" required placeholder="Name" value={inlineFormData.name} onChange={(e) => setInlineFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full bg-transparent border-b border-gray-200 py-2.5 text-xs font-semibold text-gray-900 focus:outline-none focus:border-amber-700" />
+              <input type="email" required placeholder="Email Address" value={inlineFormData.email} onChange={(e) => setInlineFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full bg-transparent border-b border-gray-200 py-2.5 text-xs font-semibold text-gray-900 focus:outline-none focus:border-amber-700" />
+              <div className="flex items-center border-b border-gray-200 focus-within:border-amber-700"><span className="text-xs text-gray-400 font-bold pr-1.5 select-none">+91</span><input type="tel" required pattern="[0-9]{10}" placeholder="Contact Number" value={inlineFormData.phone} onChange={(e) => setInlineFormData(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-transparent py-2.5 text-xs font-semibold text-gray-900 focus:outline-none" /></div>
+              <textarea rows={1} placeholder="Message" value={inlineFormData.message} onChange={(e) => setInlineFormData(prev => ({ ...prev, message: e.target.value }))} className="w-full bg-transparent border-b border-gray-200 py-2.5 text-xs font-semibold text-gray-900 focus:outline-none focus:border-amber-700 resize-none" />
+              <button type="submit" disabled={isInlineLoading} className="w-full rounded-xl bg-gradient-to-r from-[#3a2a1a] to-[#5a4229] py-3.5 text-xs font-bold uppercase tracking-widest text-[#dfc7a1] shadow-md mt-1 disabled:opacity-50">
+                {isInlineLoading ? "Sending..." : "Submit Form"}
+              </button>
+            </form>
           </div>
         </div>
 
       </div>
 
       {/* =========================================================================
-          BROCHURE MODAL WINDOW (CLEAN COMPACT DESIGN MATRICES FROM THE GIVEN IMAGE)
+          BROCHURE MODAL WINDOW (CLEAN COMPACT DESIGN MATRICES)
           ========================================================================= */}
       {isBrochureModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/70 transition-opacity duration-300 animate-fade-in">
           <div className="relative w-full max-w-md bg-white rounded-2xl shadow-2xl overflow-hidden border border-gray-100 flex flex-col p-6 sm:p-8 space-y-6">
             
-            {/* Modal Header Panel */}
             <div className="flex items-center justify-between border-b border-gray-100 pb-4">
               <h3 className="text-lg font-bold text-gray-900 tracking-tight">
                 Get More Details Enquire Now
@@ -289,80 +273,55 @@ export default function Hero() {
               </button>
             </div>
 
-            {!isBrochureSubmitted ? (
-              <form onSubmit={handleBrochureSubmit} className="space-y-4">
-                {/* Name Input Box */}
-                <div className="flex flex-col space-y-1">
-                  <input
-                    type="text"
-                    required
-                    value={brochureFormData.name}
-                    onChange={(e) => setBrochureFormData(prev => ({ ...prev, name: e.target.value }))}
-                    placeholder="Enter Name"
-                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-                  />
-                </div>
-
-                {/* Email Input Box */}
-                <div className="flex flex-col space-y-1">
-                  <input
-                    type="email"
-                    required
-                    value={brochureFormData.email}
-                    onChange={(e) => setBrochureFormData(prev => ({ ...prev, email: e.target.value }))}
-                    placeholder="Enter Email"
-                    className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
-                  />
-                </div>
-
-                {/* Contact Phone Input Box with Integrated ISD Extension */}
-                <div className="flex flex-col space-y-1">
-                  <div className="relative flex items-center border border-gray-300 rounded-xl bg-white focus-within:ring-2 focus-within:ring-gray-900 focus-within:border-transparent transition-all">
-                    <span className="flex items-center gap-1 text-sm text-gray-500 font-bold pl-4 pr-2 select-none border-r border-gray-200">
-                      <span className="inline-block w-4 h-2.5 bg-gradient-to-b from-[#FF9933] via-[#FFFFFF] to-[#128807] rounded-sm opacity-90" />
-                      +91
-                    </span>
-                    <input
-                      type="tel"
-                      required
-                      pattern="[0-9]{10}"
-                      value={brochureFormData.phone}
-                      onChange={(e) => setBrochureFormData(prev => ({ ...prev, phone: e.target.value }))}
-                      placeholder="Enter Number"
-                      className="w-full bg-transparent px-3 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none"
-                    />
-                  </div>
-                </div>
-
-                {/* Action Submit Banner Button */}
-                <button
-                  type="submit"
-                  disabled={isBrochureLoading}
-                  className="w-full rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white shadow-md hover:bg-gray-900 transition-colors duration-200 mt-2 disabled:opacity-50"
-                >
-                  {isBrochureLoading ? "Sending..." : "Submit Now"}
-                </button>
-              </form>
-            ) : (
-              /* Re-styled Modular Success State Box */
-              <div className="flex flex-col items-center justify-center text-center py-10 space-y-4 animate-scale-up">
-                <div className="h-16 w-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-sm">
-                  <CheckCircle2 className="h-8 w-8 stroke-[2.5]" />
-                </div>
-                <div className="space-y-1.5">
-                  <h3 className="text-lg font-bold text-gray-900 tracking-tight">Enquiry Received</h3>
-                  <p className="text-xs text-gray-500 max-w-xs leading-relaxed font-medium">
-                    Thank you for your interest. Your details have been submitted successfully. Our relationship team will contact you shortly with the complete project overview documents.
-                  </p>
-                </div>
-                <button
-                  onClick={() => setIsBrochureModalOpen(false)}
-                  className="mt-2 w-full rounded-xl bg-gray-950 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-sm hover:bg-gray-900 transition-colors"
-                >
-                  Dismiss Window
-                </button>
+            <form onSubmit={handleBrochureSubmit} className="space-y-4">
+              <div className="flex flex-col space-y-1">
+                <input
+                  type="text"
+                  required
+                  value={brochureFormData.name}
+                  onChange={(e) => setBrochureFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Enter Name"
+                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                />
               </div>
-            )}
+
+              <div className="flex flex-col space-y-1">
+                <input
+                  type="email"
+                  required
+                  value={brochureFormData.email}
+                  onChange={(e) => setBrochureFormData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="Enter Email"
+                  className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 focus:border-transparent transition-all"
+                />
+              </div>
+
+              <div className="flex flex-col space-y-1">
+                <div className="relative flex items-center border border-gray-300 rounded-xl bg-white focus-within:ring-2 focus-within:ring-gray-900 focus-within:border-transparent transition-all">
+                  <span className="flex items-center gap-1 text-sm text-gray-500 font-bold pl-4 pr-2 select-none border-r border-gray-200">
+                    <span className="inline-block w-4 h-2.5 bg-gradient-to-b from-[#FF9933] via-[#FFFFFF] to-[#128807] rounded-sm opacity-90" />
+                    +91
+                  </span>
+                  <input
+                    type="tel"
+                    required
+                    pattern="[0-9]{10}"
+                    value={brochureFormData.phone}
+                    onChange={(e) => setBrochureFormData(prev => ({ ...prev, phone: e.target.value }))}
+                    placeholder="Enter Number"
+                    className="w-full bg-transparent px-3 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none"
+                  />
+                </div>
+              </div>
+
+              <button
+                type="submit"
+                disabled={isBrochureLoading}
+                className="w-full rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white shadow-md hover:bg-gray-900 transition-colors duration-200 mt-2 disabled:opacity-50"
+              >
+                {isBrochureLoading ? "Sending..." : "Submit Now"}
+              </button>
+            </form>
           </div>
         </div>
       )}

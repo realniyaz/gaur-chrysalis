@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { X, Send, CheckCircle2, Loader2 } from "lucide-react";
+import { useRouter } from "next/navigation"; // 👈 Imported Next.js App Router Hook
+import { X, Send, Loader2 } from "lucide-react";
 
 interface Message {
   sender: "user" | "bot";
@@ -16,10 +17,10 @@ interface FormDataState {
 }
 
 export default function FloatingActions() {
+  const router = useRouter(); // 👈 Initialized client router container
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isStickyModalOpen, setIsStickyModalOpen] = useState(false);
-  const [isStickySubmitted, setIsStickySubmitted] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false); // 👈 Added loading state
+  const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [messages, setMessages] = useState<Message[]>([
     {
@@ -38,7 +39,7 @@ export default function FloatingActions() {
   });
 
   const phoneNumber = "+919910374156";
-  const whatsappNumber = "9170420 80055";
+  const whatsappNumber = "917042080055";
   const whatsappMessage = encodeURIComponent(
     "Hi, I am interested in Gaur Chrysalis. Please share the pricing sheet and availability status."
   );
@@ -108,7 +109,8 @@ export default function FloatingActions() {
       });
 
       if (response.ok) {
-        setIsStickySubmitted(true);
+        setIsStickyModalOpen(false); // Close operational overlay container frame
+        router.push("/thank-you");   // 🚀 Redirect handles tracking and success views uniformly
       } else {
         alert("Something went wrong. Please try again or use the Call alternative.");
       }
@@ -121,7 +123,6 @@ export default function FloatingActions() {
   };
 
   const openStickyModal = () => {
-    setIsStickySubmitted(false);
     setStickyFormData({ name: "", email: "", phone: "", message: "" });
     setIsStickyModalOpen(true);
   };
@@ -252,37 +253,26 @@ export default function FloatingActions() {
               <button onClick={() => setIsStickyModalOpen(false)} disabled={isSubmitting} className="p-1 rounded-md text-gray-400 hover:text-gray-900 hover:bg-gray-100 disabled:opacity-50"><X className="h-5 w-5 stroke-[2.5]" /></button>
             </div>
 
-            {!isStickySubmitted ? (
-              <form onSubmit={handleStickyFormSubmit} className="space-y-4">
-                <input type="text" required disabled={isSubmitting} placeholder="Enter Name" value={stickyFormData.name} onChange={(e) => setStickyFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all disabled:bg-gray-50 disabled:text-gray-400" />
-                <input type="email" required disabled={isSubmitting} placeholder="Enter Email" value={stickyFormData.email} onChange={(e) => setStickyFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all disabled:bg-gray-50 disabled:text-gray-400" />
-                <div className="relative flex items-center border border-gray-300 rounded-xl bg-white focus-within:ring-2 focus-within:ring-gray-900 transition-all">
-                  <span className="flex items-center gap-1 text-sm text-gray-500 font-bold pl-4 pr-2 select-none border-r border-gray-200">
-                    <span className="inline-block w-4 h-2.5 bg-gradient-to-b from-[#FF9933] via-[#FFFFFF] to-[#128807] rounded-sm opacity-90" /> +91
-                  </span>
-                  <input type="tel" required pattern="[0-9]{10}" disabled={isSubmitting} placeholder="Enter Number" value={stickyFormData.phone} onChange={(e) => setStickyFormData(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-transparent px-3 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none disabled:text-gray-400" />
-                </div>
-                <button type="submit" disabled={isSubmitting} className="w-full flex items-center justify-center gap-2 rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white hover:bg-gray-900 transition-colors mt-2 disabled:bg-gray-700">
-                  {isSubmitting ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" />
-                      <span>Sending...</span>
-                    </>
-                  ) : (
-                    <span>Submit Now</span>
-                  )}
-                </button>
-              </form>
-            ) : (
-              <div className="flex flex-col items-center justify-center text-center py-10 space-y-4 animate-scale-up">
-                <div className="h-16 w-16 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-sm"><CheckCircle2 className="h-8 w-8 stroke-[2.5]" /></div>
-                <div className="space-y-1.5">
-                  <h3 className="text-lg font-bold text-gray-900 tracking-tight">Enquiry Received</h3>
-                  <p className="text-xs text-gray-500 max-w-xs leading-relaxed font-medium">Thank you. Your details have been submitted successfully. A relationship manager will contact you shortly with direct project pricing documentation.</p>
-                </div>
-                <button onClick={() => setIsStickyModalOpen(false)} className="mt-2 w-full rounded-xl bg-gray-950 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-sm hover:bg-gray-900 transition-colors">Dismiss Window</button>
+            <form onSubmit={handleStickyFormSubmit} className="space-y-4">
+              <input type="text" required disabled={isSubmitting} placeholder="Enter Name" value={stickyFormData.name} onChange={(e) => setStickyFormData(prev => ({ ...prev, name: e.target.value }))} className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all disabled:bg-gray-50 disabled:text-gray-400" />
+              <input type="email" required disabled={isSubmitting} placeholder="Enter Email" value={stickyFormData.email} onChange={(e) => setStickyFormData(prev => ({ ...prev, email: e.target.value }))} className="w-full bg-white border border-gray-300 rounded-xl px-4 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none focus:ring-2 focus:ring-gray-900 transition-all disabled:bg-gray-50 disabled:text-gray-400" />
+              <div className="relative flex items-center border border-gray-300 rounded-xl bg-white focus-within:ring-2 focus-within:ring-gray-900 transition-all">
+                <span className="flex items-center gap-1 text-sm text-gray-500 font-bold pl-4 pr-2 select-none border-r border-gray-200">
+                  <span className="inline-block w-4 h-2.5 bg-gradient-to-b from-[#FF9933] via-[#FFFFFF] to-[#128807] rounded-sm opacity-90" /> +91
+                </span>
+                <input type="tel" required pattern="[0-9]{10}" disabled={isSubmitting} placeholder="Enter Number" value={stickyFormData.phone} onChange={(e) => setStickyFormData(prev => ({ ...prev, phone: e.target.value }))} className="w-full bg-transparent px-3 py-3 text-sm font-medium text-gray-900 placeholder-gray-500 focus:outline-none disabled:text-gray-400" />
               </div>
-            )}
+              <button type="submit" disabled={isSubmitting} className="w-full flex items-center justify-center gap-2 rounded-xl bg-black py-3.5 text-sm font-bold tracking-wide text-white hover:bg-gray-900 transition-colors mt-2 disabled:bg-gray-700">
+                {isSubmitting ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    <span>Sending...</span>
+                  </>
+                ) : (
+                  <span>Submit Now</span>
+                )}
+              </button>
+            </form>
           </div>
         </div>
       )}

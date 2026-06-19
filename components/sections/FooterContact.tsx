@@ -1,7 +1,8 @@
 "use client";
 
 import React, { useState } from "react";
-import { CheckCircle2, MessageSquare, Mail, User, ShieldCheck } from "lucide-react";
+import { useRouter } from "next/navigation"; // 👈 Imported Next.js App Router Hook
+import { MessageSquare, Mail, User, ShieldCheck } from "lucide-react";
 
 interface FormState {
   name: string;
@@ -11,24 +12,14 @@ interface FormState {
 }
 
 export default function FooterContact() {
+  const router = useRouter(); // 👈 Initialized client router container
   const [formData, setFormData] = useState<FormState>({
     name: "",
     email: "",
     phone: "",
     message: "",
   });
-  const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [isLoading, setIsLoading] = useState<boolean>(false);
-
-  // Wrapper to trigger Google Ads tracking event upon valid form confirmation
-  const fireConversionEvent = () => {
-    if (typeof window !== "undefined" && (window as any).gtag) {
-      (window as any).gtag('event', 'conversion', {
-        'send_to': 'AW-18243414829/S1AyCPOR0sAcEK3WkftD'
-      });
-      console.log("🎯 Footer Section Google Conversion event logged successfully.");
-    }
-  };
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -39,19 +30,23 @@ export default function FooterContact() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          ...formData,
+          name: formData.name,
+          email: formData.email,
+          phone: `+91${formData.phone}`,
+          message: formData.message || "No specific message shared.",
           context: "Footer Corporate Contact Form",
         }),
       });
 
       if (response.ok) {
-        setIsSubmitted(true);
-        fireConversionEvent();
+        // 🚀 Redirect handles the conversion tracking and success screen uniformly
+        router.push("/thank-you");
       } else {
         alert("Something went wrong. Please try connecting via call or WhatsApp.");
       }
     } catch (error) {
       console.error("Submission error:", error);
+      alert("Network connectivity issue. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -201,34 +196,6 @@ export default function FooterContact() {
 
         </div>
       </div>
-
-      {/* SUCCESS STATE FLOATING POP-UP MODAL PANEL OVERLAY */}
-      {isSubmitted && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-md bg-black/60 transition-opacity duration-300 animate-fade-in">
-          <div className="relative w-full max-w-sm bg-white rounded-3xl p-6 sm:p-8 shadow-2xl text-center border border-gray-100 flex flex-col items-center space-y-4 animate-scale-up">
-            
-            <div className="h-14 w-14 bg-emerald-50 rounded-2xl flex items-center justify-center text-emerald-600 border border-emerald-100 shadow-inner">
-              <CheckCircle2 className="h-8 w-8 stroke-[2.5]" />
-            </div>
-
-            <div className="space-y-1.5">
-              <h3 className="text-lg font-black text-gray-900 tracking-tight">
-                Enquiry Sent Successfully!
-              </h3>
-              <p className="text-xs text-gray-500 leading-relaxed max-w-xs mx-auto">
-                Thank you for reaching out. Your elite pricing ticket has been filed. An authorised corporate sales strategist will contact you within the next 15 minutes with complete inventory breakdowns.
-              </p>
-            </div>
-
-            <button
-              onClick={() => setIsSubmitted(false)}
-              className="w-full mt-2 rounded-xl bg-gray-900 hover:bg-gray-800 py-3 text-xs font-bold uppercase tracking-widest text-white shadow-md transition-colors"
-            >
-              Acknowledge & Dismiss
-            </button>
-          </div>
-        </div>
-      )}
     </section>
   );
 }
