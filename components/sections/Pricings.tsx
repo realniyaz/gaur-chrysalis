@@ -33,13 +33,13 @@ export default function Pricing() {
     {
       type: "3 BHK Apartments",
       price: "₹ 1.39 Cr* (₹ 8,499/- Sq.Ft.)", // 👈 Clean, presentable price line update
-      size: "1625 Sq. ft.",
+      size: "1550 Sq. ft.",
       ctaText: "Download Floor Plan",
     },
     {
       type: "4 BHK Apartments",
       price: "₹ On Request",
-      size: "1960 Sq. ft.",
+      size: "1950 Sq. ft.",
       ctaText: "Download Floor Plan",
     },
   ];
