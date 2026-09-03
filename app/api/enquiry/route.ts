@@ -43,7 +43,7 @@ export async function POST(request: Request) {
             notes: `Source Context: ${context || "General Enquiry"}. User Message: ${message || "N/A"}`,
             submittedDate: submittedDate,
             submittedTime: submittedTime,
-            subsource: "Website Direct",
+            subsource: "Google",
             leadStatus: "New",
           },
         ]),
