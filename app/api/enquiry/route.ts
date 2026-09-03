@@ -4,19 +4,62 @@ import { Resend } from "resend";
 
 export async function POST(request: Request) {
   try {
-    // 1. Initialize Resend inside the request lifecycle to protect build optimization pipelines
-    const resend = new Resend(process.env.RESEND_API_KEY || "re_placeholder_for_builds");
-
     const body = await request.json();
     const { name, email, phone, message, context } = body;
 
-    // 2. Core Validation Guard Checks
+    // 1. Core Validation Guard Checks
     if (!name || !phone) {
       return NextResponse.json(
         { error: "Name and Contact Number fields are required." },
         { status: 400 }
       );
     }
+
+    // 2. Format & Sanitize Parameters for CRM
+    const cleanedMobile = phone.replace(/\D/g, "").slice(-10);
+
+    const now = new Date();
+    const pad = (n: number) => String(n).padStart(2, "0");
+    const submittedDate = `${pad(now.getDate())}-${pad(now.getMonth() + 1)}-${String(now.getFullYear()).slice(-2)}`;
+    const submittedTime = `${pad(now.getHours())}:${pad(now.getMinutes())}:${pad(now.getSeconds())}`;
+
+    // 3. PUSH LEAD TO LEADRAT CRM (Array Payload Format)
+    try {
+      await fetch("https://connect.leadrat.com/api/v1/integration/Website", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "API-Key": "YTBlMzgxODItZWU0NC00M2I1LThhNDQtZWVlOTg3M2I0ZmFl",
+        },
+        body: JSON.stringify([
+          {
+            name: name,
+            mobile: cleanedMobile,
+            email: email || "",
+            countryCode: "91",
+            project: "Gaur Chrysalis",
+            property: "Apartment",
+            propertyType: context || "Luxury Residences",
+            notes: `Source Context: ${context || "General Enquiry"}. User Message: ${message || "N/A"}`,
+            submittedDate: submittedDate,
+            submittedTime: submittedTime,
+            subsource: "Website Direct",
+            leadStatus: "New",
+          },
+        ]),
+      });
+    } catch (crmError) {
+      // Failsafe: Log CRM error so Resend email dispatch continues uninterrupted
+      console.error("LeadRat CRM Integration Error:", crmError);
+    }
+
+    // 4. DISPATCH RESEND LEAD NOTIFICATION EMAIL
+    if (!process.env.RESEND_API_KEY) {
+      throw new Error("Missing runtime server environment variable: RESEND_API_KEY");
+    }
+
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const recipientEmail = process.env.LEAD_RECIPIENT_EMAIL || "realtyfmleads@gmail.com";
 
     const emailHtml = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; border: 1px solid #eaeaea; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.05);">
@@ -56,28 +99,26 @@ export async function POST(request: Request) {
           </div>
         </div>
         <div style="background-color: #fafafa; padding: 16px; text-align: center; border-top: 1px solid #eaeaea; color: #888; font-size: 11px;">
-          This tracking alert was routed autonomously on behalf of your Next.js application stack.
+          This tracking alert was routed to LeadRat CRM and delivered to your inbox via Resend.
         </div>
       </div>
     `;
 
-    // 3. Double Check Key Presence at runtime execution phase
-    if (!process.env.RESEND_API_KEY) {
-      throw new Error("Missing runtime server environment variables.");
-    }
-
     await resend.emails.send({
       from: "Gaur Lead Portal <sales@gaursresidences.in>",
-      to: ["realtyfmleads@gmail.com"],
+      to: [recipientEmail],
       subject: `🚨 New Lead: ${name} (${context || "Gaur Chrysalis Enquiry"})`,
       html: emailHtml,
     });
 
-    return NextResponse.json({ success: true, message: "Lead dispatched safely." }, { status: 200 });
-  } catch (error: any) {
-    console.error("Resend Processing Error Intercepted:", error);
     return NextResponse.json(
-      { error: "Internal server compilation error." },
+      { success: true, message: "Lead dispatched safely to CRM and Email." },
+      { status: 200 }
+    );
+  } catch (error: any) {
+    console.error("Lead Processing Error:", error);
+    return NextResponse.json(
+      { error: error.message || "Internal server compilation error." },
       { status: 500 }
     );
   }
