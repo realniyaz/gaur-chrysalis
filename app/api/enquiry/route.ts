@@ -105,7 +105,7 @@ export async function POST(request: Request) {
     `;
 
     await resend.emails.send({
-      from: "Gaur Lead Portal <sales@gaursresidences.in>",
+      from: "Gaur Lead Portal <onboarding@resend.dev>",
       to: [recipientEmail],
       subject: `🚨 New Lead: ${name} (${context || "Gaur Chrysalis Enquiry"})`,
       html: emailHtml,
