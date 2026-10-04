@@ -29,7 +29,7 @@ export async function POST(request: Request) {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          "API-Key": "ZTVjYWUyNTctMDY5YS00YS1Ma21LTk1IN2ItNWI4NGQzNTRjM2Fi",
+          "API-Key": "ZTVjYWUyNTctMDY5YS00MzNiLTk1N2ItNWI4NGQzNTRjM2Fi",
         },
         body: JSON.stringify([
           {
